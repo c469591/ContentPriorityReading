@@ -148,7 +148,8 @@ def process_speech_reorder(speech_sequence):
             # 檢查是否為控件類型（精確匹配或包含匹配）
             is_control = False
             for control_type in control_types:
-                if text == control_type or control_type in text:
+#                if text == control_type or control_type in text:
+                if text == control_type:
                     control_items.append(text)
                     is_control = True
                     if debugMode:

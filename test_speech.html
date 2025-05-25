@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVDA 控件重排測試頁面</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            max-width: 800px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            margin: 5px;
+            padding: 5px;
+        }
+        .button-group button {
+            margin: 5px;
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>NVDA 內容優先朗讀測試頁面</h1>
+    
+    <!-- 按鈕測試區 -->
+    <div class="section">
+        <h2>按鈕測試區</h2>
+        <div class="button-group">
+            <button type="button">提交資料</button>
+            <button type="submit">儲存設定</button>
+            <button type="reset">清除表單</button>
+            <input type="button" value="確認送出">
+            <input type="submit" value="完成註冊">
+            <button disabled>無法點擊</button>
+        </div>
+    </div>
+
+    <!-- 連結測試區 -->
+    <div class="section">
+        <h2>連結測試區</h2>
+        <p>
+            <a href="#section1">前往第一章</a> |
+            <a href="https://www.google.com" target="_blank">Google搜尋</a> |
+            <a href="mailto:test@example.com">聯絡我們</a> |
+            <a href="tel:+886-2-12345678">客服專線</a>
+        </p>
+        <p>
+            <a href="#" onclick="alert('點擊事件')">彈出訊息</a> |
+            <a href="document.pdf" download>使用手冊PDF</a>
+        </p>
+    </div>
+
+    <!-- 表單控件測試區 -->
+    <div class="section">
+        <h2>表單控件測試區</h2>
+        <form>
+            <div class="form-group">
+                <label for="text1">姓名:</label>
+                <input type="text" id="text1" value="張小明" placeholder="請輸入姓名">
+            </div>
+            
+            <div class="form-group">
+                <label for="email1">信箱:</label>
+                <input type="email" id="email1" value="user@example.com" placeholder="請輸入信箱">
+            </div>
+            
+            <div class="form-group">
+                <label for="password1">密碼:</label>
+                <input type="password" id="password1" value="secret123" placeholder="請輸入密碼">
+            </div>
+            
+            <div class="form-group">
+                <label for="number1">年齡:</label>
+                <input type="number" id="number1" value="25" min="1" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="select1">城市:</label>
+                <select id="select1">
+                    <option value="">請選擇城市</option>
+                    <option value="taipei" selected>台北市</option>
+                    <option value="taichung">台中市</option>
+                    <option value="kaohsiung">高雄市</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="textarea1">意見:</label>
+                <textarea id="textarea1" rows="3" placeholder="請輸入意見回饋">使用者意見回饋內容</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>性別:</label>
+                <input type="radio" id="radio1" name="gender" value="male" checked>
+                <label for="radio1">男性</label>
+                <input type="radio" id="radio2" name="gender" value="female">
+                <label for="radio2">女性</label>
+            </div>
+            
+            <div class="form-group">
+                <label>選項:</label>
+                <input type="checkbox" id="check1" checked>
+                <label for="check1">同意服務條款</label>
+                <input type="checkbox" id="check2">
+                <label for="check2">訂閱電子報</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="range1">音量:</label>
+                <input type="range" id="range1" min="0" max="100" value="50">
+                <span>50%</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="file1">檔案:</label>
+                <input type="file" id="file1" accept=".jpg,.png,.pdf">
+            </div>
+        </form>
+    </div>
+
+    <!-- 清單測試區 -->
+    <div class="section">
+        <h2>清單測試區</h2>
+        <h3>購物清單</h3>
+        <ul>
+            <li>蘋果 5顆</li>
+            <li>香蕉 3根</li>
+            <li>橘子 8顆</li>
+        </ul>
+        
+        <h3>操作步驟</h3>
+        <ol>
+            <li>開啟瀏覽器</li>
+            <li>輸入網址</li>
+            <li>點擊登入</li>
+        </ol>
+        
+        <h3>專業術語</h3>
+        <dl>
+            <dt>HTML</dt>
+            <dd>網頁結構語言</dd>
+            <dt>CSS</dt>
+            <dd>網頁樣式表</dd>
+        </dl>
+    </div>
+
+    <!-- 表格測試區 -->
+    <div class="section">
+        <h2>表格測試區</h2>
+        <table>
+            <caption>員工薪資表 2024年度</caption>
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>部門</th>
+                    <th>薪資</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>張小明</td>
+                    <td>資訊部</td>
+                    <td>50000元</td>
+                </tr>
+                <tr>
+                    <td>李小華</td>
+                    <td>行銷部</td>
+                    <td>45000元</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 標題測試區 -->
+    <div class="section">
+        <h2>標題測試區</h2>
+        <h1>公司簡介</h1>
+        <h2>服務項目</h2>
+        <h3>網站設計</h3>
+        <h4>響應式設計</h4>
+        <h5>手機版優化</h5>
+        <h6>平板版調整</h6>
+    </div>
+
+    <!-- 圖片測試區 -->
+    <div class="section">
+        <h2>圖片測試區</h2>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwN2FjYyIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5UZXN0PC90ZXh0Pjwvc3ZnPg==" alt="測試圖片 藍色方塊" width="100" height="100">
+        
+        <figure>
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzI4YTc0NSIvPjwvc3ZnPg==" alt="圓形圖標 綠色圓圈">
+            <figcaption>這是一個綠色圓圈</figcaption>
+        </figure>
+    </div>
+
+    <!-- 導航測試區 -->
+    <div class="section">
+        <h2>導航測試區</h2>
+        <nav aria-label="主要導航">
+            <ul>
+                <li><a href="#home">首頁</a></li>
+                <li><a href="#about">關於我們</a></li>
+                <li><a href="#services">服務項目</a></li>
+                <li><a href="#contact">聯絡我們</a></li>
+            </ul>
+        </nav>
+        
+        <aside>
+            <h3>相關資訊</h3>
+            <p>提供額外資訊</p>
+        </aside>
+    </div>
+
+    <!-- 互動元素測試區 -->
+    <div class="section">
+        <h2>互動元素測試區</h2>
+        <details>
+            <summary>點擊展開詳細資訊</summary>
+            <p>這裡是隱藏的詳細資訊</p>
+        </details>
+        
+        <dialog id="test-dialog">
+            <p>這是一個測試對話框</p>
+            <button onclick="document.getElementById('test-dialog').close()">關閉對話框</button>
+        </dialog>
+        
+        <button onclick="document.getElementById('test-dialog').showModal()">顯示對話框</button>
+    </div>
+
+    <!-- 進度測試區 -->
+    <div class="section">
+        <h2>進度測試區</h2>
+        <progress value="65" max="100">65% 完成</progress>
+        <meter value="8" min="0" max="10">評分 8分</meter>
+        
+        <div role="status" aria-live="polite">系統正常運作</div>
+        <div role="alert">請注意安全</div>
+    </div>
+
+    <!-- 重點測試區 (問題重現區) -->
+    <div class="section">
+        <h2>重點測試區 - 問題重現</h2>
+        <p>這個區域專門測試你遇到的問題：</p>
+        
+        <ul>
+            <li>網頁測試 153 之 149</li>
+            <li>浙江移動 153 之 137</li>
+            <li>文件下載 25 個項目</li>
+            <li>頁面瀏覽 第 5 頁</li>
+            <li>按鈕操作 點擊確認</li>
+        </ul>
+        
+        <p>混合測試：這段文字包含 <a href="#">Google搜尋</a> 和 <button>立即購買</button> 元素。</p>
+        
+        <div>獨立項目：網頁測試 153 之 149</div>
+        <div>數字格式：頁碼 第 25 頁</div>
+        <div>進度格式：完成 80% 進度</div>
+    </div>
+
+    <footer>
+        <p>版權所有 2024年</p>
+    </footer>
+</body>
+</html>
