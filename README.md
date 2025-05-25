@@ -6,7 +6,7 @@
 ## 下載
 
 * 你可以
-[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.1.nvda-addon)
+[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.2.nvda-addon)
 的NVDA插件。
 * 你還可以前往我的github倉庫頁面
 [點我前往內容優先朗讀的github倉庫頁面](https://github.com/c469591/ContentPriorityReading)
@@ -89,3 +89,6 @@ c469591@mail.batol.net
 完成問題重現後，記得按同樣的快捷鍵關閉調試模式，避免產生過多日誌資訊。
 
 
+## 更新日誌
+
+* v0.2 修復跟其他需要補貨朗讀內容的插件衝突的問題
