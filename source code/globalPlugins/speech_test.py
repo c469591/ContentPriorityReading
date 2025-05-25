@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 """
-內容優先朗讀插件
+內容優先朗讀插件（純API版本）
 讓純文本內容在控件信息之前朗讀，提供更好的閱讀體驗
+完全依賴NVDA本地化API，支援所有語言
 快捷鍵：NVDA+Ctrl+Shift+Y 切換功能開關
 """
 
@@ -22,84 +23,106 @@ lastProcessedSequence = []
 
 # 獲取本地化控件類型名稱的緩存
 _localized_control_types = None
+_api_source_info = None
 
 def get_localized_control_types():
-    """獲取當前語言的本地化控件類型名稱"""
-    global _localized_control_types
+    """純API版本：完全依賴NVDA的本地化系統獲取控件類型名稱"""
+    global _localized_control_types, _api_source_info
     
     if _localized_control_types is not None:
         return _localized_control_types
     
     control_types = []
+    api_info = {
+        'total_roles': 0,
+        'successful_roles': 0,
+        'api_method': 'unknown',
+        'failed_roles': []
+    }
     
-    # 常用的控件角色 - 移除不存在的 SUBMENU
-    common_roles = [
-        controlTypes.Role.LINK,
-        controlTypes.Role.BUTTON, 
-        controlTypes.Role.HEADING,
-        controlTypes.Role.EDITABLETEXT,
-        controlTypes.Role.CHECKBOX,
-        controlTypes.Role.LIST,
-        controlTypes.Role.TABLE,
-        controlTypes.Role.DIALOG,
-        controlTypes.Role.COMBOBOX,
-        controlTypes.Role.SLIDER,
-        controlTypes.Role.TREEVIEW,
-        controlTypes.Role.MENUBAR,
-        controlTypes.Role.TOOLBAR,
-        controlTypes.Role.STATUSBAR,
-        controlTypes.Role.TAB,
-        controlTypes.Role.GROUPING,
-        controlTypes.Role.PANEL,
-        controlTypes.Role.LANDMARK,
-        controlTypes.Role.WINDOW,
-        controlTypes.Role.MENUITEM
-    ]
-    
-    # 嘗試添加可能存在的其他角色
-    additional_roles = ['SUBMENU', 'TEXTFRAME', 'PANE', 'SEPARATOR']
-    for role_name in additional_roles:
-        try:
-            role = getattr(controlTypes.Role, role_name, None)
-            if role is not None:
-                common_roles.append(role)
-        except:
-            continue
-    
-    for role in common_roles:
-        try:
-            # 獲取本地化名稱
-            if hasattr(controlTypes, 'roleLabels'):
-                localized_name = controlTypes.roleLabels.get(role, "")
-            else:
-                # 備用方案：舊版本NVDA可能使用不同的屬性名
-                localized_name = getattr(controlTypes, 'speechRoleLabels', {}).get(role, "")
-            
-            if localized_name and localized_name.strip():
-                control_types.append(localized_name.strip())
-        except Exception as e:
-            if debugMode:
-                logHandler.log.debug(f"獲取角色 {role} 的本地化名稱時出錯: {str(e)}")
-            continue
-    
-    # 手動添加常見的本地化控件類型（從日誌中觀察到的）
-    manual_types = [
-        '連結', '按鈕', '標題', '編輯區', '核取方塊', '清單', '表格', 
-        '對話方塊', '下拉方塊', '滑桿', '樹狀檢視', '功能表', '工具列', 
-        '狀態列', '頁籤', '群組', '面板', '地標', '視窗', '文字方塊',
-        '子功能表', '功能表項目'  # 添加從日誌中看到的"子功能表"
-    ]
-    
-    # 合併並去重
-    all_types = list(set(control_types + manual_types))
-    
-    # 緩存結果
-    _localized_control_types = all_types
+    # 動態獲取所有Role枚舉值
+    all_roles = []
+    try:
+        for attr_name in dir(controlTypes.Role):
+            if not attr_name.startswith('_') and not attr_name in ['name', 'value']:
+                try:
+                    role = getattr(controlTypes.Role, attr_name)
+                    # 檢查是否是有效的枚舉值
+                    if hasattr(role, 'name') and hasattr(role, 'value'):
+                        all_roles.append(role)
+                        api_info['total_roles'] += 1
+                except Exception as e:
+                    if debugMode:
+                        logHandler.log.debug(f"跳過無效角色 {attr_name}: {str(e)}")
+                    continue
+    except Exception as e:
+        logHandler.log.error(f"獲取Role枚舉時出錯: {str(e)}")
+        return []
     
     if debugMode:
-        logHandler.log.info(f"獲取到的本地化控件類型: {all_types}")
+        logHandler.log.info(f"找到 {len(all_roles)} 個Role枚舉值")
     
-    return all_types
+    # 嘗試不同的API方法獲取本地化名稱
+    for role in all_roles:
+        localized_name = ""
+        
+        try:
+            # 方法1：使用新版本的roleLabels
+            if hasattr(controlTypes, 'roleLabels') and controlTypes.roleLabels:
+                localized_name = controlTypes.roleLabels.get(role, "")
+                if localized_name and api_info['api_method'] == 'unknown':
+                    api_info['api_method'] = 'controlTypes.roleLabels'
+            
+            # 方法2：使用舊版本的speechRoleLabels（備用）
+            if not localized_name and hasattr(controlTypes, 'speechRoleLabels'):
+                localized_name = controlTypes.speechRoleLabels.get(role, "")
+                if localized_name and api_info['api_method'] == 'unknown':
+                    api_info['api_method'] = 'controlTypes.speechRoleLabels'
+            
+            # 方法3：嘗試通過其他可能的屬性
+            if not localized_name:
+                # 檢查是否有其他本地化相關的屬性
+                for attr in ['displayString', 'localizedString', 'label']:
+                    if hasattr(role, attr):
+                        try:
+                            localized_name = getattr(role, attr, "")
+                            if localized_name and api_info['api_method'] == 'unknown':
+                                api_info['api_method'] = f'role.{attr}'
+                            break
+                        except:
+                            continue
+            
+            # 如果成功獲取到本地化名稱
+            if localized_name and localized_name.strip():
+                clean_name = localized_name.strip()
+                if clean_name not in control_types:  # 避免重複
+                    control_types.append(clean_name)
+                    api_info['successful_roles'] += 1
+                    
+                    if debugMode:
+                        logHandler.log.debug(f"成功獲取 {role.name} -> '{clean_name}'")
+            else:
+                api_info['failed_roles'].append(role.name)
+                
+        except Exception as e:
+            api_info['failed_roles'].append(f"{role.name}({str(e)})")
+            if debugMode:
+                logHandler.log.debug(f"獲取角色 {role.name} 本地化名稱失敗: {str(e)}")
+    
+    # 緩存結果和API信息
+    _localized_control_types = control_types
+    _api_source_info = api_info
+    
+    # 記錄獲取結果
+    success_rate = (api_info['successful_roles'] / api_info['total_roles'] * 100) if api_info['total_roles'] > 0 else 0
+    logHandler.log.info(f"純API獲取控件類型完成: {api_info['successful_roles']}/{api_info['total_roles']} ({success_rate:.1f}%), 使用方法: {api_info['api_method']}")
+    
+    if debugMode:
+        logHandler.log.info(f"獲取到的本地化控件類型: {control_types}")
+        if api_info['failed_roles']:
+            logHandler.log.debug(f"獲取失敗的角色: {api_info['failed_roles'][:10]}")  # 只顯示前10個
+    
+    return control_types
 
 def reorderSpeak(speechSequence, *args, **kwargs):
     """重排語音序列的攔截函數"""
@@ -145,7 +168,8 @@ def process_speech_reorder(speech_sequence):
     control_types = get_localized_control_types()
     
     if not control_types:
-        # 如果無法獲取本地化控件類型，返回原序列
+        if debugMode:
+            logHandler.log.warning("無法獲取本地化控件類型，跳過重排")
         return speech_sequence
     
     # 分離文本項目和其他項目
@@ -157,31 +181,42 @@ def process_speech_reorder(speech_sequence):
     for item in speech_sequence:
         if isinstance(item, str) and item.strip():
             text = item.strip()
-            if text in control_types:
-                control_items.append(text)
-            else:
-                # 進一步檢查是否包含控件類型關鍵詞
-                is_control = False
-                for control_type in control_types:
-                    if control_type in text:
-                        control_items.append(text)
-                        is_control = True
-                        break
-                if not is_control:
-                    content_items.append(text)
+            
+            # 檢查是否為控件類型（精確匹配或包含匹配）
+            is_control = False
+            for control_type in control_types:
+                if text == control_type or control_type in text:
+                    control_items.append(text)
+                    is_control = True
+                    if debugMode:
+                        logHandler.log.debug(f"識別為控件類型: '{text}' (匹配: '{control_type}')")
+                    break
+            
+            if not is_control:
+                content_items.append(text)
+                if debugMode:
+                    logHandler.log.debug(f"識別為內容: '{text}'")
         else:
             other_items.append(item)
+            if debugMode:
+                logHandler.log.debug(f"識別為其他項目: {type(item)} {item}")
     
     # 如果沒有控件類型或沒有內容，不重排
     if not control_items or not content_items:
+        if debugMode:
+            logHandler.log.debug(f"不進行重排 - 控件項目: {len(control_items)}, 內容項目: {len(content_items)}")
         return speech_sequence
     
     # 重排：內容在前，控件類型在後，其他項目保持在相應位置
     result = content_items + control_items + other_items
+    
+    if debugMode:
+        logHandler.log.info(f"重排完成: 內容({len(content_items)}) + 控件({len(control_items)}) + 其他({len(other_items)})")
+    
     return result
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
-    """內容優先朗讀插件"""
+    """內容優先朗讀插件（純API版本）"""
     
     scriptCategory = "內容優先朗讀"
     
@@ -212,11 +247,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 主要攔截
         speech.speak = reorderSpeak
         
-        logHandler.log.info("內容優先朗讀插件已啟動")
+        # 預先載入控件類型（初始化時進行）
+        try:
+            control_types = get_localized_control_types()
+            logHandler.log.info(f"內容優先朗讀插件已啟動 - 載入了 {len(control_types)} 個本地化控件類型")
+        except Exception as e:
+            logHandler.log.error(f"初始化控件類型時出錯: {str(e)}")
     
     def terminate(self):
         """插件終止時恢復原始函數"""
-        global originalSpeak, originalSpeakObject, _localized_control_types
+        global originalSpeak, originalSpeakObject, _localized_control_types, _api_source_info
         
         if originalSpeak:
             speech.speak = originalSpeak
@@ -235,17 +275,24 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         
         # 清除緩存
         _localized_control_types = None
+        _api_source_info = None
         
         logHandler.log.info("內容優先朗讀插件已關閉")
     
-    # 刷新本地化控件類型的方法（當語言設置改變時使用）
+    # 重新載入本地化控件類型
     def refresh_localized_types(self):
-        """刷新本地化控件類型緩存"""
-        global _localized_control_types
+        """重新載入本地化控件類型緩存"""
+        global _localized_control_types, _api_source_info
         _localized_control_types = None
-        get_localized_control_types()
-        ui.message("已刷新本地化控件類型")
-        logHandler.log.info("已刷新本地化控件類型緩存")
+        _api_source_info = None
+        
+        try:
+            control_types = get_localized_control_types()
+            ui.message(f"已重新載入 {len(control_types)} 個本地化控件類型")
+            logHandler.log.info("已重新載入本地化控件類型緩存")
+        except Exception as e:
+            ui.message(f"重新載入失敗：{str(e)}")
+            logHandler.log.error(f"重新載入控件類型失敗: {str(e)}")
     
     def script_toggleSpeechReorder(self, gesture):
         """切換內容優先朗讀功能"""
@@ -273,19 +320,59 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         
         logHandler.log.info(f"調試模式已{'開啟' if debugMode else '關閉'}")
     
+    def script_diagnoseAPI(self, gesture):
+        """診斷API狀態和控件類型來源"""
+        global _api_source_info
+        
+        try:
+            control_types = get_localized_control_types()
+            
+            ui.message("=== API診斷報告 ===")
+            
+            if _api_source_info:
+                info = _api_source_info
+                success_rate = (info['successful_roles'] / info['total_roles'] * 100) if info['total_roles'] > 0 else 0
+                
+                ui.message(f"API方法: {info['api_method']}")
+                ui.message(f"成功率: {info['successful_roles']}/{info['total_roles']} ({success_rate:.1f}%)")
+                ui.message(f"獲取到 {len(control_types)} 個控件類型")
+                
+                if len(control_types) > 0:
+                    ui.message(f"範例: {', '.join(control_types[:5])}")
+                
+                if success_rate < 50:
+                    ui.message("⚠️ API獲取成功率較低，可能需要檢查NVDA版本兼容性")
+                elif success_rate >= 80:
+                    ui.message("✅ API工作正常")
+                else:
+                    ui.message("⚡ API部分工作，建議檢查")
+            else:
+                ui.message("❌ 無API診斷信息，可能初始化失敗")
+                
+        except Exception as e:
+            ui.message(f"診斷時發生錯誤：{str(e)}")
+            logHandler.log.error(f"API診斷錯誤: {str(e)}")
+    
     def script_testReorder(self, gesture):
         """測試語音重排功能"""
-        # 使用日誌中實際看到的語音序列進行測試
+        control_types = get_localized_control_types()
+        
+        if not control_types:
+            ui.message("無法測試：未獲取到控件類型")
+            return
+        
+        # 使用實際獲取到的控件類型進行測試
         test_sequences = [
-            ['連結', '', 'arrow_drop_down'],
-            ['偏好(P)', '子功能表', 'p'],
-            ['檢視事件記錄(L)', '功能表項目', 'l']
+            [control_types[0] if len(control_types) > 0 else '未知', '', '測試內容1'],
+            ['測試內容2', control_types[1] if len(control_types) > 1 else '未知', ''],
+            [control_types[2] if len(control_types) > 2 else '未知', '測試內容3', '額外信息']
         ]
         
         ui.message("測試語音重排功能：")
         
-        for seq in test_sequences:
+        for i, seq in enumerate(test_sequences, 1):
             reordered = process_speech_reorder(seq)
+            ui.message(f"測試 {i}")
             ui.message(f"原始: {seq}")
             ui.message(f"重排: {reordered}")
     
@@ -296,17 +383,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
             
             if control_types:
                 ui.message(f"當前本地化控件類型共 {len(control_types)} 個：")
-                ui.message(", ".join(control_types[:10]))  # 只顯示前10個
-                if len(control_types) > 10:
-                    ui.message(f"還有 {len(control_types) - 10} 個...")
+                
+                # 分批顯示，避免信息過多
+                batch_size = 8
+                for i in range(0, len(control_types), batch_size):
+                    batch = control_types[i:i + batch_size]
+                    ui.message(f"第 {i//batch_size + 1} 批: {', '.join(batch)}")
+                    
+                    if i + batch_size >= 24:  # 最多顯示3批
+                        remaining = len(control_types) - i - batch_size
+                        if remaining > 0:
+                            ui.message(f"還有 {remaining} 個...")
+                        break
             else:
-                ui.message("無法獲取本地化控件類型")
+                ui.message("❌ 無法獲取本地化控件類型")
         except Exception as e:
             ui.message(f"獲取控件類型時發生錯誤：{str(e)}")
             logHandler.log.error(f"獲取控件類型錯誤: {str(e)}")
     
     def script_refreshLocalizedTypes(self, gesture):
-        """刷新本地化控件類型"""
+        """重新載入本地化控件類型"""
         self.refresh_localized_types()
     
     def script_showStatus(self, gesture):
@@ -317,8 +413,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         try:
             control_types = get_localized_control_types()
             ui.message(f"已載入 {len(control_types)} 個本地化控件類型")
+            
+            if _api_source_info:
+                ui.message(f"API方法: {_api_source_info['api_method']}")
         except Exception as e:
-            ui.message(f"獲取控件類型狀態時出錯：{str(e)}")
+            ui.message(f"獲取狀態時出錯：{str(e)}")
         
         if lastProcessedSequence:
             ui.message(f"最後處理: {lastProcessedSequence}")
@@ -326,9 +425,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     # 快捷鍵說明
     script_toggleSpeechReorder.__doc__ = "切換內容優先朗讀功能開關"
     script_toggleDebugMode.__doc__ = "切換調試模式，用於查看語音序列處理詳情"
+    script_diagnoseAPI.__doc__ = "診斷API狀態和控件類型獲取情況"
     script_testReorder.__doc__ = "測試語音重排功能，演示重排效果"
     script_showControlTypes.__doc__ = "顯示當前本地化的控件類型列表"
-    script_refreshLocalizedTypes.__doc__ = "刷新本地化控件類型緩存"
+    script_refreshLocalizedTypes.__doc__ = "重新載入本地化控件類型緩存"
     script_showStatus.__doc__ = "顯示插件當前狀態和最後處理的序列"
     
     # 快捷鍵綁定 - 只綁定主要功能
@@ -337,8 +437,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 其他功能沒有預設快捷鍵，用戶可透過NVDA輸入手勢對話框自定義
         # 可用的功能：
         # - toggleDebugMode: 切換調試模式
+        # - diagnoseAPI: 診斷API狀態  
         # - testReorder: 測試語音重排功能  
         # - showControlTypes: 顯示本地化控件類型
-        # - refreshLocalizedTypes: 刷新本地化控件類型
+        # - refreshLocalizedTypes: 重新載入本地化控件類型
         # - showStatus: 顯示插件狀態
     }
