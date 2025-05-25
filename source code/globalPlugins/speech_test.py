@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 """
-NVDA語音重排插件 - 修正處理邏輯版
-正確處理NVDA的列表格式語音序列
+內容優先朗讀插件
+讓純文本內容在控件信息之前朗讀，提供更好的閱讀體驗
+快捷鍵：NVDA+Ctrl+Shift+Y 切換功能開關
 """
 
 import globalPluginHandler
@@ -10,8 +11,6 @@ import speech.speech
 import api
 import ui
 import logHandler
-import re
-import scriptHandler
 
 # 全局變量
 originalSpeak = None
@@ -42,7 +41,8 @@ def reorderSpeak(speechSequence, *args, **kwargs):
         lastProcessedSequence = reordered_sequence.copy()
         return originalSpeak(reordered_sequence, *args, **kwargs)
     except Exception as e:
-        logHandler.log.error(f"語音重排處理錯誤: {str(e)}")
+        if debugMode:
+            logHandler.log.error(f"語音重排處理錯誤: {str(e)}")
         return originalSpeak(speechSequence, *args, **kwargs)
 
 def reorderSpeakObject(obj, *args, **kwargs):
@@ -55,7 +55,7 @@ def reorderSpeakObject(obj, *args, **kwargs):
     return originalSpeakObject(obj, *args, **kwargs)
 
 def process_speech_reorder(speech_sequence):
-    """處理語音序列重排的核心函數 - 修正版"""
+    """處理語音序列重排的核心函數"""
     if not speech_sequence or len(speech_sequence) < 2:
         return speech_sequence
     
@@ -70,26 +70,21 @@ def process_speech_reorder(speech_sequence):
     # 分離文本項目和其他項目
     text_items = []
     other_items = []
-    original_indices = []  # 記錄原始位置
     
-    for i, item in enumerate(speech_sequence):
-        if isinstance(item, str):
+    for item in speech_sequence:
+        if isinstance(item, str) and item.strip():
             text_items.append(item.strip())
-            original_indices.append(i)
         else:
-            other_items.append((i, item))  # 保存位置和項目
+            other_items.append(item)
     
-    # 過濾空字符串
-    filtered_texts = [text for text in text_items if text]
-    
-    if len(filtered_texts) < 2:
+    if len(text_items) < 2:
         return speech_sequence
     
     # 識別控件類型和內容
     control_items = []
     content_items = []
     
-    for text in filtered_texts:
+    for text in text_items:
         if text in control_types:
             control_items.append(text)
         else:
@@ -100,21 +95,13 @@ def process_speech_reorder(speech_sequence):
         return speech_sequence
     
     # 重排：內容在前，控件類型在後
-    reordered_texts = content_items + control_items
-    
-    # 重構最終序列
-    result = reordered_texts.copy()
-    
-    # 添加其他非文本項目到最後
-    for pos, item in other_items:
-        result.append(item)
-    
+    result = content_items + control_items + other_items
     return result
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
-    """語音重排全局插件 - 修正版"""
+    """內容優先朗讀插件"""
     
-    scriptCategory = "語音重排"
+    scriptCategory = "內容優先朗讀"
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -140,7 +127,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 主要攔截
         speech.speak = reorderSpeak
         
-        logHandler.log.info("語音重排插件已啟動 - 修正版")
+        logHandler.log.info("內容優先朗讀插件已啟動")
     
     def terminate(self):
         """插件終止時恢復原始函數"""
@@ -161,20 +148,20 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         except:
             pass
         
-        logHandler.log.info("語音重排插件已關閉")
+        logHandler.log.info("內容優先朗讀插件已關閉")
     
     def script_toggleSpeechReorder(self, gesture):
-        """切換語音重排功能"""
+        """切換內容優先朗讀功能"""
         global speechReorderEnabled
         
         speechReorderEnabled = not speechReorderEnabled
         
         if speechReorderEnabled:
-            ui.message("語音重排已開啟：純文本將在控件信息之前朗讀")
+            ui.message("內容優先朗讀已開啟")
         else:
-            ui.message("語音重排已關閉：恢復原始朗讀順序")
+            ui.message("內容優先朗讀已關閉")
         
-        logHandler.log.info(f"語音重排功能已{'開啟' if speechReorderEnabled else '關閉'}")
+        logHandler.log.info(f"內容優先朗讀功能已{'開啟' if speechReorderEnabled else '關閉'}")
     
     def script_toggleDebugMode(self, gesture):
         """切換調試模式"""
@@ -190,7 +177,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         logHandler.log.info(f"調試模式已{'開啟' if debugMode else '關閉'}")
     
     def script_testReorder(self, gesture):
-        """測試重排功能"""
+        """測試語音重排功能"""
         test_sequences = [
             ['連結', '', 'Web Hosting'],
             ['按鈕', '', '確定'],
@@ -205,23 +192,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
             ui.message(f"重排: {reordered}")
     
     def script_showStatus(self, gesture):
-        """顯示狀態"""
-        ui.message(f"語音重排: {'開啟' if speechReorderEnabled else '關閉'}")
+        """顯示插件狀態"""
+        ui.message(f"內容優先朗讀: {'開啟' if speechReorderEnabled else '關閉'}")
         ui.message(f"調試模式: {'開啟' if debugMode else '關閉'}")
         
         if lastProcessedSequence:
             ui.message(f"最後處理: {lastProcessedSequence}")
     
     # 快捷鍵說明
-    script_toggleSpeechReorder.__doc__ = "切換語音重排功能"
-    script_toggleDebugMode.__doc__ = "切換調試模式"
-    script_testReorder.__doc__ = "測試語音重排功能"
-    script_showStatus.__doc__ = "顯示插件狀態"
+    script_toggleSpeechReorder.__doc__ = "切換內容優先朗讀功能開關"
+    script_toggleDebugMode.__doc__ = "切換調試模式，用於查看語音序列處理詳情"
+    script_testReorder.__doc__ = "測試語音重排功能，演示重排效果"
+    script_showStatus.__doc__ = "顯示插件當前狀態和最後處理的序列"
     
-    # 快捷鍵綁定
+    # 快捷鍵綁定 - 只綁定主要功能
     __gestures = {
-        "kb:NVDA+ctrl+shift+y": "toggleSpeechReorder",
-        "kb:NVDA+ctrl+shift+i": "toggleDebugMode",
-        "kb:NVDA+ctrl+shift+u": "testReorder", 
-        "kb:NVDA+ctrl+shift+o": "showStatus"
+        "kb:NVDA+ctrl+shift+y": "toggleSpeechReorder"
+        # 其他功能沒有預設快捷鍵，用戶可透過NVDA輸入手勢對話框自定義
+        # 可用的功能：
+        # - toggleDebugMode: 切換調試模式
+        # - testReorder: 測試語音重排功能  
+        # - showStatus: 顯示插件狀態
     }
