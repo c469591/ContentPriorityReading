@@ -380,5 +380,5 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     
     # 快捷鍵綁定
     __gestures = {
-        "kb:NVDA+ctrl+shift+y": "toggleSpeechReorder"
+        "kb:NVDA+control+shift+y": "toggleSpeechReorder"
     }
