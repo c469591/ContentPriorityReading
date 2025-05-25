@@ -1,7 +1,13 @@
 
-# 內容優先朗讀插件（純API版本）
+# 內容優先朗讀NVDA插件
 
 讓純文本內容在控件信息之前朗讀，提供更好的閱讀體驗。完全依賴NVDA本地化API，支援所有語言。
+
+## 下載
+
+你可以
+[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.1.nvda-addon)
+的NVDA插件。
 
 ### 相容性
 
