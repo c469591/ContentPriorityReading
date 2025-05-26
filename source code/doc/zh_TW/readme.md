@@ -6,14 +6,14 @@
 ## 下載
 
 * 你可以
-[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.2.nvda-addon)
+[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.21.nvda-addon)
 的NVDA插件。
 * 你還可以前往我的github倉庫頁面
 [點我前往內容優先朗讀的github倉庫頁面](https://github.com/c469591/ContentPriorityReading)
 
 ### 相容性
 
-NVDA2024.1上測試正常
+NVDA2024.1以上版本測試正常
 
 ## 🚀 功能特色
 
@@ -57,7 +57,7 @@ NVDA2024.1上測試正常
 開啟後：「首頁 連結」
 
 你還可以打開這個測試頁面，啟動內容優先朗讀來測試效果
-[點我打開測試頁面](https://github.com/c469591/ContentPriorityReading/raw/main/test_speech.html)
+[點我打開測試頁面](https://twapi.lambgui.com/lamb_gui/html/test_speech.html)
 
 ## 🛠️ 故障排除
 
