@@ -8,6 +8,7 @@ import speech
 import speech.speech
 from speech.commands import SpeechCommand
 from speech.extensions import filter_speechSequence
+import config
 import ui
 import logHandler
 
@@ -15,6 +16,12 @@ import logHandler
 originalGetPropertiesSpeech = None
 speechReorderEnabled = False
 debugMode = False
+
+# 配置規格
+CONFIG_SPEC = {
+    "enabled": "boolean(default=False)",
+    "debugMode": "boolean(default=False)",
+}
 
 # 屬性參數（需要移到最後朗讀的）
 PROPERTY_PARAMS = {
@@ -168,7 +175,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        global originalGetPropertiesSpeech
+        global originalGetPropertiesSpeech, speechReorderEnabled, debugMode
+
+        # 註冊配置規格
+        config.conf.spec["contentPriorityReading"] = CONFIG_SPEC
+
+        # 從配置讀取狀態
+        speechReorderEnabled = config.conf["contentPriorityReading"]["enabled"]
+        debugMode = config.conf["contentPriorityReading"]["debugMode"]
 
         # 備份並攔截 getPropertiesSpeech
         originalGetPropertiesSpeech = speech.speech.getPropertiesSpeech
@@ -181,7 +195,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 註冊官方的語音序列過濾器
         filter_speechSequence.register(internal_reorder_speech_filter)
 
-        logHandler.log.info("內容優先朗讀插件已啟動 (使用官方 Filter API + 屬性標記)")
+        status = "開啟" if speechReorderEnabled else "關閉"
+        logHandler.log.info(f"內容優先朗讀插件已啟動，狀態: {status}")
 
     def terminate(self):
         # 插件終止時恢復原始函數
@@ -201,11 +216,23 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
         logHandler.log.info("內容優先朗讀插件已關閉")
 
+    # 保存配置的輔助函數
+    def internal_save_config(self):
+        global speechReorderEnabled, debugMode
+        config.conf["contentPriorityReading"]["enabled"] = speechReorderEnabled
+        config.conf["contentPriorityReading"]["debugMode"] = debugMode
+        # 立即保存到磁盤
+        try:
+            config.conf.save()
+        except:
+            pass
+
     def script_toggleSpeechReorder(self, gesture):
         # 切換內容優先朗讀功能
         global speechReorderEnabled
 
         speechReorderEnabled = not speechReorderEnabled
+        self.internal_save_config()
 
         if speechReorderEnabled:
             ui.message("內容優先朗讀已開啟")
@@ -219,6 +246,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         global debugMode
 
         debugMode = not debugMode
+        self.internal_save_config()
 
         if debugMode:
             ui.message("調試模式已開啟")
@@ -231,7 +259,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 顯示插件狀態
         ui.message(f"內容優先朗讀: {'開啟' if speechReorderEnabled else '關閉'}")
         ui.message(f"調試模式: {'開啟' if debugMode else '關閉'}")
-        ui.message("模式: 官方 Filter API + 屬性標記")
 
     # 快捷鍵綁定
     __gestures = {
