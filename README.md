@@ -1,12 +1,12 @@
 
 # 內容優先朗讀NVDA插件
 
-讓純文本內容在控件信息之前朗讀，提供更好的閱讀體驗。完全依賴NVDA本地化API，支援所有語言。
+讓純文本內容在控件信息之前朗讀，以享受更好的操作體驗。
 
 ## 下載
 
 * 你可以
-[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.21.nvda-addon)
+[點擊這裡下載最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.3.nvda-addon)
 的NVDA插件。
 * 你還可以前往我的github倉庫頁面
 [點我前往內容優先朗讀的github倉庫頁面](https://github.com/c469591/ContentPriorityReading)
@@ -93,12 +93,20 @@ c469591@mail.batol.net
 
 ## 更新日誌
 
+### V0.3
+
+1. 使用官方 filter_speechSequence API 重構，提升與其他插件的相容性
+2. 使用 PropertyTextCommand 精確標記控件類型和狀態，徹底解決純文字誤判問題
+3. 擴展重排範圍：不僅控件類型（連結、按鈕等），狀態（選中、按下等）也會移到最後朗讀
+4. 新增配置保存功能，重啟 NVDA 後自動記憶開關狀態
+5. 新增多語言支持：繁體中文、簡體中文、英文
+6. 尊重用戶設定：不會朗讀用戶設定中已關閉的屬性
+
 ### V0.21
 
 1. 使用精確匹配控件避免錯誤排序
-1. 新增了一個測試用的html檔案
+2. 新增了一個測試用的html檔案
 
+### v0.2
 
-### v0.2 
-
-* 修復跟其他需要補貨朗讀內容的插件衝突的問題
+* 修復跟其他需要捕獲朗讀內容的插件衝突的問題

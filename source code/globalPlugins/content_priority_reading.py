@@ -4,7 +4,6 @@
 # 精確識別控件類型和狀態，避免純文字誤判
 
 import globalPluginHandler
-import addonHandler
 import speech
 import speech.speech
 from speech.commands import SpeechCommand
@@ -12,9 +11,50 @@ from speech.extensions import filter_speechSequence
 import config
 import ui
 import logHandler
+import os
+import gettext
+import languageHandler
 
 # 初始化翻譯
-addonHandler.initTranslation()
+def internal_init_translation():
+    # 初始化插件的國際化翻譯
+    try:
+        # 獲取插件目錄和 locale 資料夾路徑
+        addon_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(addon_dir)
+        locale_dir = os.path.join(parent_dir, "locale")
+
+        # 獲取當前 NVDA 使用的語言
+        lang = languageHandler.getLanguage()
+
+        # 構建語言回退列表
+        languages = [lang]
+
+        # 如果語言代碼包含下劃線，也嘗試主要語言代碼
+        if '_' in lang:
+            main_lang = lang.split('_')[0]
+            languages.append(main_lang)
+
+        # 添加英文作為最終回退
+        if 'en' not in languages:
+            languages.append('en')
+
+        # 創建翻譯對象
+        translation = gettext.translation(
+            "nvda",
+            localedir=locale_dir,
+            languages=languages,
+            fallback=True
+        )
+
+        return translation.gettext
+
+    except Exception:
+        # 如果初始化失敗，返回原文
+        return lambda x: x
+
+# 獲取翻譯函數
+_ = internal_init_translation()
 
 # 全局變量
 originalGetPropertiesSpeech = None
