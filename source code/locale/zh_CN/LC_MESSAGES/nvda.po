@@ -1,0 +1,71 @@
+# Content Priority Speaking NVDA Add-on
+# Simplified Chinese translation
+# Copyright (C) 2024
+# This file is distributed under the same license as the Content Priority Speaking package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Content Priority Speaking\n"
+"POT-Creation-Date: 2024-01-30\n"
+"PO-Revision-Date: 2026-01-30 21:00+0800\n"
+"Last-Translator: \n"
+"Language-Team: Chinese (Simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+
+# 输入手势类别名称
+msgid "Content Priority Speaking"
+msgstr "内容优先朗读"
+
+msgid "enabled"
+msgstr "已开启"
+
+msgid "disabled"
+msgstr "已关闭"
+
+# 开启内容优先朗读时的提示消息
+msgid "Content priority speaking enabled"
+msgstr "内容优先朗读已开启"
+
+# 关闭内容优先朗读时的提示消息
+msgid "Content priority speaking disabled"
+msgstr "内容优先朗读已关闭"
+
+# 切换内容优先朗读功能的脚本说明
+msgid "Toggle content priority reading on or off"
+msgstr "切换内容优先朗读功能开关"
+
+# 开启调试模式时的提示消息
+msgid "Debug mode enabled"
+msgstr "调试模式已开启"
+
+# 关闭调试模式时的提示消息
+msgid "Debug mode disabled"
+msgstr "调试模式已关闭"
+
+# 切换调试模式的脚本说明
+msgid "Toggle debug mode on or off"
+msgstr "切换调试模式开关"
+
+# 显示状态时，内容优先朗读已开启
+msgid "Content priority speaking: enabled"
+msgstr "内容优先朗读：已开启"
+
+# 显示状态时，内容优先朗读已关闭
+msgid "Content priority speaking: disabled"
+msgstr "内容优先朗读：已关闭"
+
+# 显示状态时，调试模式已开启
+msgid "Debug mode: enabled"
+msgstr "调试模式：已开启"
+
+# 显示状态时，调试模式已关闭
+msgid "Debug mode: disabled"
+msgstr "调试模式：已关闭"
+
+# 显示插件状态的脚本说明
+msgid "Show the current status of the addon"
+msgstr "显示插件当前状态"

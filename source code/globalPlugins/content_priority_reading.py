@@ -4,6 +4,7 @@
 # 精確識別控件類型和狀態，避免純文字誤判
 
 import globalPluginHandler
+import addonHandler
 import speech
 import speech.speech
 from speech.commands import SpeechCommand
@@ -11,6 +12,9 @@ from speech.extensions import filter_speechSequence
 import config
 import ui
 import logHandler
+
+# 初始化翻譯
+addonHandler.initTranslation()
 
 # 全局變量
 originalGetPropertiesSpeech = None
@@ -171,7 +175,8 @@ def internal_reorder_speech_filter(
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     # 內容優先朗讀插件
 
-    scriptCategory = "內容優先朗讀"
+    # Translators: 輸入手勢類別名稱
+    scriptCategory = _("Content Priority Speaking")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -195,8 +200,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         # 註冊官方的語音序列過濾器
         filter_speechSequence.register(internal_reorder_speech_filter)
 
-        status = "開啟" if speechReorderEnabled else "關閉"
-        logHandler.log.info(f"內容優先朗讀插件已啟動，狀態: {status}")
+        status = _("enabled") if speechReorderEnabled else _("disabled")
+        logHandler.log.info(f"Content Priority Speaking addon started, status: {status}")
 
     def terminate(self):
         # 插件終止時恢復原始函數
@@ -214,7 +219,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
             if hasattr(speech, 'getPropertiesSpeech'):
                 speech.getPropertiesSpeech = originalGetPropertiesSpeech
 
-        logHandler.log.info("內容優先朗讀插件已關閉")
+        logHandler.log.info("Content Priority Speaking addon terminated")
 
     # 保存配置的輔助函數
     def internal_save_config(self):
@@ -235,11 +240,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         self.internal_save_config()
 
         if speechReorderEnabled:
-            ui.message("內容優先朗讀已開啟")
+            # Translators: 開啟內容優先朗讀時的提示訊息
+            ui.message(_("Content priority speaking enabled"))
         else:
-            ui.message("內容優先朗讀已關閉")
+            # Translators: 關閉內容優先朗讀時的提示訊息
+            ui.message(_("Content priority speaking disabled"))
 
-        logHandler.log.info(f"內容優先朗讀功能已{'開啟' if speechReorderEnabled else '關閉'}")
+        logHandler.log.info(f"Content priority speaking {'enabled' if speechReorderEnabled else 'disabled'}")
+
+    # Translators: 切換內容優先朗讀功能的腳本說明
+    script_toggleSpeechReorder.__doc__ = _("Toggle content priority reading on or off")
 
     def script_toggleDebugMode(self, gesture):
         # 切換調試模式
@@ -249,16 +259,37 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
         self.internal_save_config()
 
         if debugMode:
-            ui.message("調試模式已開啟")
+            # Translators: 開啟調試模式時的提示訊息
+            ui.message(_("Debug mode enabled"))
         else:
-            ui.message("調試模式已關閉")
+            # Translators: 關閉調試模式時的提示訊息
+            ui.message(_("Debug mode disabled"))
 
-        logHandler.log.info(f"調試模式已{'開啟' if debugMode else '關閉'}")
+        logHandler.log.info(f"Debug mode {'enabled' if debugMode else 'disabled'}")
+
+    # Translators: 切換調試模式的腳本說明
+    script_toggleDebugMode.__doc__ = _("Toggle debug mode on or off")
 
     def script_showStatus(self, gesture):
         # 顯示插件狀態
-        ui.message(f"內容優先朗讀: {'開啟' if speechReorderEnabled else '關閉'}")
-        ui.message(f"調試模式: {'開啟' if debugMode else '關閉'}")
+        if speechReorderEnabled:
+            # Translators: 顯示狀態時，內容優先朗讀已開啟
+            status = _("Content priority speaking: enabled")
+        else:
+            # Translators: 顯示狀態時，內容優先朗讀已關閉
+            status = _("Content priority speaking: disabled")
+        ui.message(status)
+
+        if debugMode:
+            # Translators: 顯示狀態時，調試模式已開啟
+            debug_status = _("Debug mode: enabled")
+        else:
+            # Translators: 顯示狀態時，調試模式已關閉
+            debug_status = _("Debug mode: disabled")
+        ui.message(debug_status)
+
+    # Translators: 顯示插件狀態的腳本說明
+    script_showStatus.__doc__ = _("Show the current status of the addon")
 
     # 快捷鍵綁定
     __gestures = {

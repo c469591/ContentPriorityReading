@@ -1,0 +1,59 @@
+# Content Priority Speaking NVDA Add-on
+# English translation (source language)
+# Copyright (C) 2024
+# This file is distributed under the same license as the Content Priority Speaking package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Content Priority Speaking\n"
+"POT-Creation-Date: 2024-01-30\n"
+"PO-Revision-Date: 2026-01-30 21:00+0800\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+
+msgid "Content Priority Speaking"
+msgstr "Content Priority Speaking"
+
+msgid "enabled"
+msgstr "enabled"
+
+msgid "disabled"
+msgstr "disabled"
+
+msgid "Content priority speaking enabled"
+msgstr "Content priority speaking enabled"
+
+msgid "Content priority speaking disabled"
+msgstr "Content priority speaking disabled"
+
+msgid "Toggle content priority reading on or off"
+msgstr "Toggle content priority reading on or off"
+
+msgid "Debug mode enabled"
+msgstr "Debug mode enabled"
+
+msgid "Debug mode disabled"
+msgstr "Debug mode disabled"
+
+msgid "Toggle debug mode on or off"
+msgstr "Toggle debug mode on or off"
+
+msgid "Content priority speaking: enabled"
+msgstr "Content priority speaking: enabled"
+
+msgid "Content priority speaking: disabled"
+msgstr "Content priority speaking: disabled"
+
+msgid "Debug mode: enabled"
+msgstr "Debug mode: enabled"
+
+msgid "Debug mode: disabled"
+msgstr "Debug mode: disabled"
+
+msgid "Show the current status of the addon"
+msgstr "Show the current status of the addon"
