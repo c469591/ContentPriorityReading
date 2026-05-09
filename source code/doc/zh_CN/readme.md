@@ -6,7 +6,7 @@
 ## 下载
 
 * 你可以
-[点击这里下载最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.3.nvda-addon)
+[点击这里下载最新版本](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading-0.3.nvda-addon)
 的NVDA插件。
 * 你还可以前往我的github仓库页面
 [点我前往内容优先朗读的github仓库页面](https://github.com/c469591/ContentPriorityReading)

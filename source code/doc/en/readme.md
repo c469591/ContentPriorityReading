@@ -6,7 +6,7 @@ Speak plain text content before control information for a better user experience
 ## Download
 
 * You can
-[click here to download the latest version](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading%20V0.3.nvda-addon)
+[click here to download the latest version](https://github.com/c469591/ContentPriorityReading/raw/main/content_priority_reading-0.3.nvda-addon)
 of the NVDA add-on.
 * You can also visit my GitHub repository page
 [Click here to go to the Content Priority Speaking GitHub repository](https://github.com/c469591/ContentPriorityReading)
